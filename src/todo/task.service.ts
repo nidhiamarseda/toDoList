@@ -1,13 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { TaskModule } from './task.module';
+import { CreateTaskDto } from './dto/create-task.dto';
+import { UpdateTaskDto } from './dto/update-task.dto';
+import { TaskModel } from '../todo/entities/task.entity'
+
 
 @Injectable()
 export class TaskService {
-    private tasks: TaskModule[] = [];
+    private tasks: TaskModel[] = [];
     private id: number = 1;
 
 
-    createTask(newTask: TaskModule) {
+    createTask(newTask: CreateTaskDto) : TaskModel {
         const task = {
             id: this.id++,
             description: newTask.description,
@@ -17,7 +20,7 @@ export class TaskService {
         return task
     }
 
-    findAllTasks(): TaskModule[] {
+    findAllTasks(): TaskModel[] {
         return this.tasks;
     }
 
@@ -30,13 +33,20 @@ export class TaskService {
         return this.tasks
     }
 
-    updateTaskById(id: number, updatedTask: TaskModule) {
-        this.tasks.forEach(task => {
-            if (task.id == id) {
-                task.description = updatedTask.description;
-                task.completed = updatedTask.completed;
-            }
-        });
-        return this.tasks
-    }
-}
+    updateTaskById(id: number, updatedTask: UpdateTaskDto): TaskModel {
+        const task = this.tasks.find(task => task.id == id);
+
+        if (!task) {
+            throw new Error(`Task with id ${id} not found`);
+        }
+
+        if (updatedTask.description !== undefined) {
+            task.description = updatedTask.description;
+        }
+        if (updatedTask.completed !== undefined) {
+            task.completed = updatedTask.completed;
+        }
+
+        return task;
+    } 
+}    
