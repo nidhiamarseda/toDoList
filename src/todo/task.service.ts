@@ -4,31 +4,36 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 import { TaskModel } from '../todo/entities/task.entity'
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { User } from 'src/users/user.entity';
 
 
 @Injectable()
 export class TaskService {
 
-  constructor(@InjectRepository(TaskModel)
-  private taskRepository: Repository<TaskModel>
+  constructor(
+    @InjectRepository(TaskModel)
+    private taskRepository: Repository<TaskModel>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) { }
 
   /**
    * @param createTaskDto DTO carrying `description` and optional `completed`
    * @returns Newly created `TaskModel` after persistence
    */
-  createTask(createTaskDto: CreateTaskDto): Promise<TaskModel> {
-    const newTask = this.taskRepository.create(createTaskDto);
-    return this.taskRepository.save(newTask);
+  async createTask(createTaskDto: CreateTaskDto, userId: number): Promise<TaskModel> {
+    const newTask = this.taskRepository.create({ ...createTaskDto, userId });
+    return await this.taskRepository.save(newTask);
   }
-
-
 
   /**
    * @returns Array of all `TaskModel` records
    */
-  async findAllTasks(): Promise<TaskModel[]> {
-    return await this.taskRepository.find();
+  async findAllTasks(userId: number): Promise<TaskModel[]> {
+    return this.taskRepository.find({
+      where: { user: { id: userId } },
+      order: { id: 'DESC' },
+    });
   }
 
 

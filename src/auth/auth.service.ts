@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { User } from '../users/user.entity';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
@@ -13,6 +14,7 @@ export class AuthService {
    * @param jwtService Service used to sign and verify JWT tokens
    */
   constructor(
+    private readonly configService: ConfigService,
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private jwtService: JwtService,
@@ -26,14 +28,16 @@ export class AuthService {
    * @throws ConflictException If the username already exists
    */
   async register(username: string, password: string) {
-    const existingUser = await this.userRepository.findOne({ where: { username } });
+    const existingUser = await this.userRepository.findOne({ where: { username }, select: ['id', 'username', 'password'], });
     if (existingUser) {
       throw new ConflictException('Username already exists');
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, this.configService.get('BCRYPT_SALT'));
     const user = this.userRepository.create({ username, password: hashedPassword });
-    return this.userRepository.save(user);
+    const newUser = await this.userRepository.save(user);
+    const userData = { userId: newUser.id, username: newUser.username }
+    return userData;
   }
 
 
@@ -45,7 +49,7 @@ export class AuthService {
    * @throws UnauthorizedException If credentials are invalid
    */
   async login(username: string, password: string) {
-    const user = await this.userRepository.findOne({ where: { username } });
+    const user = await this.userRepository.findOne({ where: { username }, select: ['id', 'username', 'password'] });
     if (!user) throw new UnauthorizedException('Invalid username or password');
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -64,6 +68,6 @@ export class AuthService {
    * @returns The matching `User` entity or `null` if not found
    */
   async validateUser(username: string) {
-    return this.userRepository.findOne({ where: { username } });
+    return this.userRepository.findOne({ where: { username }, select: ['id', 'username', 'password'] });
   }
 }
