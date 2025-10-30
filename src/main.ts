@@ -19,6 +19,8 @@ async function bootstrap() {
   .setDescription('You can add your daily tasks')
   .setVersion('1.0')
   .addTag('tasks')
+  .addTag('auth')
+  .addBearerAuth()
   .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);

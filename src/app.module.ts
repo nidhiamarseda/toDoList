@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TodoModule } from './todo/todo.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [ TypeOrmModule.forRoot({
@@ -14,7 +15,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     database: 'todo_db',
     entities: [__dirname + '/**/*.entity{.ts,.js}'],
     synchronize: true
-  }) ,TodoModule],
+  }) ,TodoModule, AuthModule],
   controllers: [AppController],
   providers: [AppService],
 })
