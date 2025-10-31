@@ -18,6 +18,13 @@ export class AwsService {
     });
   }
 
+  /**
+   * Uploads a file to AWS S3 bucket
+   * 
+   * @param {Express.Multer.File} file - The file object from Multer containing buffer, originalname, and mimetype
+   * @returns {Promise<string>} The public URL of the uploaded file in S3
+   * @throws {Error} Throws an error if the upload to S3 fails
+   */
   async uploadFile(file: Express.Multer.File): Promise<string> {
     const fileExt = path.extname(file.originalname);
     const key = `todos/${uuid()}${fileExt}`;
