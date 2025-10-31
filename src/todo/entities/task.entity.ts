@@ -13,8 +13,17 @@ export class TaskModel {
   @Column({ default: false })
   completed: boolean;
 
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+  updatedAt: Date;
+
   @Column()
   userId: number;
+
+  @Column({ nullable: true })
+  imageUrl: string;
 
   @ManyToOne(() => User, (user) => user.tasks, { nullable: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })

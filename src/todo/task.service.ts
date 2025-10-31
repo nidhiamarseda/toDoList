@@ -21,8 +21,8 @@ export class TaskService {
    * @param createTaskDto DTO carrying `description` and optional `completed`
    * @returns Newly created `TaskModel` after persistence
    */
-  async createTask(createTaskDto: CreateTaskDto, userId: number): Promise<TaskModel> {
-    const newTask = this.taskRepository.create({ ...createTaskDto, userId });
+  async createTask(createTaskDto: CreateTaskDto, userId: number, imageUrl: string): Promise<TaskModel> {
+    const newTask = this.taskRepository.create({ ...createTaskDto, userId, imageUrl });
     return await this.taskRepository.save(newTask);
   }
 
@@ -42,8 +42,8 @@ export class TaskService {
    * @returns The matching `TaskModel` if found
    * @throws NotFoundException when no task exists for the given id
    */
-  async findTaskById(id: number) {
-    const task = await this.taskRepository.findOne({ where: { id } });
+  async findTaskById(id: number, userId: number) {
+    const task = await this.taskRepository.findOne({ where: { id, userId } });
     if (!task) {
       throw new NotFoundException('Task Not Found');
     }
